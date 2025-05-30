@@ -1,13 +1,862 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<!-- Add CSS at the head of HTML file -->
-    <link rel="stylesheet" href="./css/main.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification of Norton's Theorem</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="script.js" defer></script>
+    <h1>Verification of Norton's Theorem</h1>
+
+    <div class="main-container">
+        <div class="procedure-panel">
+            <h2>Simplified Procedure (Step-by-Step)</h2>
+            <p><strong>✅ Before You Start:</strong></p>
+            <p>Make sure JavaScript is enabled in your browser.</p>
+            <p>Set all resistors (R₁, R₂, R₃, and Rᴸ) close to their maximum values.</p>
+            <p>You can choose any values for the voltages V₁ and V₂.</p>
+            <h2>🔬 Select the Part of the Experiment You Want to Do:</h2>
+            <p><strong>🟦 Case 1 – Find the Load Current (𝐼ₗ):</strong></p>
+            <p>Set switch S₁ = Power and S₂ = Load.</p>
+            <p>Click Simulate.</p>
+            <p>The load current (𝐼ₗ) will be displayed.</p>
+            <p><strong>🟦 Case 2 – Norton’s Theorem Steps:</strong></p>
+            <p>a) <strong>Find Norton Short Circuit Current (𝐼ₛ𝒸):</strong></p>
+            <p>Set S₁ = Power, S₂ = Short.</p>
+            <p>Click Simulate.</p>
+            <p>Note the value of 𝐼ₛ𝒸.</p>
+            <p>b) <strong>Find Norton Resistance (𝑅ₙ):</strong></p>
+            <p>Set S₁ = Short, S₂ = Power.</p>
+            <p>Click Simulate.</p>
+            <p>Note the value of 𝑅ₙ.</p>
+            <p><strong>🟦 Case 3 – Use Norton Values to Calculate Load Current:</strong></p>
+            <p>Go to Case 3 tab.</p>
+            <p>You’ll see the load current (𝐼ₗ) calculated using:</p>
+            <p>𝐼ₗ = 𝐼ₛ𝒸 ⋅ (Rᴸ / (Rₙ + Rᴸ))</p>
+            <p>Compare this with the load current from Case 1.</p>
+            <p><strong>📝 Notes:</strong></p>
+            <p>MC = Moving Coil meter.</p>
+            <p>DPDT = Double Pole Double Throw (type of switch).</p>
+            <p>All resistances are in ohms (Ω).</p>
+        </div>
+
+        <div class="circuit-container">
+            <div class="calculation-panel-left">
+                <h2>Inputs & Switches</h2>
+                <div class="input-field">
+                    <label>V1:</label>
+                    <input type="number" id="v1-input" value="220" min="0" step="1" oninput="updateCircuitLabels()">V
+                </div>
+                <div class="input-field">
+                    <label>V2:</label>
+                    <input type="number" id="v2-input" value="110" min="0" step="1" oninput="updateCircuitLabels()">V
+                </div>
+                <div class="input-field">
+                    <label>R1:</label>
+                    <input type="number" id="r1-input" value="100" min="1" step="1" oninput="updateCircuitLabels()">Ω
+                </div>
+                <div class="input-field">
+                    <label>R2:</label>
+                    <input type="number" id="r2-input" value="150" min="1" step="1" oninput="updateCircuitLabels()">Ω
+                </div>
+                <div class="input-field">
+                    <label>R3:</label>
+                    <input type="number" id="r3-input" value="200" min="1" step="1" oninput="updateCircuitLabels()">Ω
+                </div>
+                <div class="input-field">
+                    <label>Rᴸ:</label>
+                    <input type="number" id="rl-input" value="250" min="1" step="1" oninput="updateCircuitLabels()">Ω
+                </div>
+                <div class="switch">
+                    <label>S1:</label>
+                    <select id="s1">
+                        <option value="power">Power</option>
+                        <option value="short">Short</option>
+                        <option value="dpdt">DPDT</option>
+                    </select>
+                </div>
+                <div class="switch">
+                    <label>S2:</label>
+                    <select id="s2">
+                        <option value="load">Load</option>
+                        <option value="short">Short</option>
+                        <option value="power">Power</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="circuit-panel">
+                <h2>Circuit Diagram</h2>
+                <img id="circuit-image" src="Norton-1.png" alt="Norton-1">
+                <svg id="circuit-overlay" class="circuit-overlay">
+                    <text id="v1-label" x="17" y="297">V1: 220 V</text>
+                    <text id="v2-label" x="400" y="305">V2: 110 V</text>
+                    <text id="r1-label" x="190" y="220">R1: 100 Ω</text>
+                    <text id="r2-label" x="230" y="290">R2: 150 Ω</text>
+                    <text id="r3-label" x="320" y="220">R3: 200 Ω</text>
+                    <text id="rl-label" x="500" y="310">Rᴸ: 250 Ω</text>
+                </svg>
+                <button class="save-diagram-btn" onclick="saveCircuitDiagram()">Save Diagram</button>
+            </div>
+
+            <div class="calculation-panel-right">
+                <h2>Meters</h2>
+                <div class="meter">
+                    <div id="meter-a1-label">Meter A1: Iₗ</div>
+                    <svg class="meter-svg" viewBox="0 0 180 120">
+                        <circle cx="90" cy="90" r="80" fill="#f0f0f0" stroke="#333" stroke-width="3"/>
+                        <path d="M 10 90 A 80 80 0 0 1 170 90" fill="none" stroke="url(#meterGradientA)" stroke-width="15"/>
+                        <defs>
+                            <linearGradient id="meterGradientA" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#ff9999"/>
+                                <stop offset="50%" stop-color="#ff4d4d"/>
+                                <stop offset="100%" stop-color="#ff9999"/>
+                            </linearGradient>
+                        </defs>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(-90 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(-45 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(0 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(45 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(90 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="60" class="meter-tick-minor" transform="rotate(-67.5 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="60" class="meter-tick-minor" transform="rotate(-22.5 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="60" class="meter-tick-minor" transform="rotate(22.5 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="60" class="meter-tick-minor" transform="rotate(67.5 90 90)"/>
+                        <text x="90" y="45" class="meter-label" transform="rotate(-90 90 90)">-5 A</text>
+                        <text x="90" y="45" class="meter-label" transform="rotate(-45 90 90)">-2.5 A</text>
+                        <text x="90" y="45" class="meter-label" transform="rotate(0 90 90)">0 A</text>
+                        <text x="90" y="45" class="meter-label" transform="rotate(45 90 90)">2.5 A</text>
+                        <text x="90" y="45" class="meter-label" transform="rotate(90 90 90)">5 A</text>
+                        <line x1="90" y1="90" x2="90" y2="30" stroke="#333" stroke-width="3" opacity="0.3" transform-origin="90 90" id="a1-needle-shadow"/>
+                        <line x1="90" y1="90" x2="90" y2="30" stroke="url(#needleGradientA)" stroke-width="2" transform-origin="90 90" id="a1-needle" filter="url(#needleGlow)"/>
+                        <defs>
+                            <linearGradient id="needleGradientA" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#ff4d4d"/>
+                                <stop offset="100%" stop-color="#cc0000"/>
+                            </linearGradient>
+                            <filter id="needleGlow" x="-50%" y="-50%" width="200%" height="200%">
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+                                <feMerge>
+                                    <feMergeNode in="blur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <circle cx="90" cy="90" r="78" fill="url(#glassGradient)" opacity="0.3"/>
+                        <defs>
+                            <radialGradient id="glassGradient">
+                                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+                                <stop offset="100%" stop-color="#aaaaaa" stop-opacity="0.2"/>
+                            </radialGradient>
+                        </defs>
+                        <rect x="70" y="100" width="40" height="15" fill="#333" rx="3"/>
+                        <text x="90" y="110" class="meter-text">A1</text>
+                    </svg>
+                </div>
+                <div class="meter">
+                    <div id="meter-mc-label">Meter MC: Voltage</div>
+                    <svg class="meter-svg" viewBox="0 0 180 120">
+                        <circle cx="90" cy="90" r="80" fill="#f0f0f0" stroke="#333" stroke-width="3"/>
+                        <path d="M 50 90 A 40 40 0 0 1 130 90" fill="none" stroke="url(#meterGradientV)" stroke-width="15"/>
+                        <defs>
+                            <linearGradient id="meterGradientV" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#99b3ff"/>
+                                <stop offset="50%" stop-color="#4d79ff"/>
+                                <stop offset="100%" stop-color="#99b3ff"/>
+                            </linearGradient>
+                        </defs>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(-90 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(-45 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(0 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="60" class="meter-tick-minor" transform="rotate(-67.5 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="60" class="meter-tick-minor" transform="rotate(-22.5 90 90)"/>
+                        <text x="90" y="45" class="meter-label" transform="rotate(-90 90 90)">0 V</text>
+                        <text x="90" y="45" class="meter-label" transform="rotate(-45 90 90)">150 V</text>
+                        <text x="90" y="45" class="meter-label" transform="rotate(0 90 90)">300 V</text>
+                        <line x1="90" y1="90" x2="90" y2="30" stroke="#333" stroke-width="3" opacity="0.3" transform-origin="90 90" id="mc-needle-shadow"/>
+                        <line x1="90" y1="90" x2="90" y2="30" stroke="url(#needleGradientV)" stroke-width="2" transform-origin="90 90" id="mc-needle" filter="url(#needleGlow)"/>
+                        <defs>
+                            <linearGradient id="needleGradientV" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#4d79ff"/>
+                                <stop offset="100%" stop-color="#0033cc"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="90" cy="90" r="78" fill="url(#glassGradient)" opacity="0.3"/>
+                        <rect x="70" y="100" width="40" height="15" fill="#333" rx="3"/>
+                        <text x="90" y="110" class="meter-text">MC</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="calculation-panel">
+            <h2>Experiment Selection</h2>
+            <div class="tabs">
+                <div class="tab active" onclick="selectTab('case1')">Case 1</div>
+                <div class="tab" onclick="selectTab('case2a')">Case 2a</div>
+                <div class="tab" onclick="selectTab('case2b')">Case 2b</div>
+                <div class="tab" onclick="selectTab('case3')">Case 3</div>
+            </div>
+        </div>
+
+        <div class="results-panel" id="results">
+            <h2 id="results-title">Results</h2>
+            <p id="results-equation">Select a case and click Simulate to view results.</p>
+            <div class="power-values">
+                <p id="il-container" class="hidden">Load Current (Iₗ, Case 1): <span id="il-value">0</span> A</p>
+                <p id="vl-container" class="hidden">Load Voltage (Vₗ, Case 1): <span id="vl-value">0</span> V</p>
+                <p id="rl-calc-container">Load Resistance (Rᴸ = Vₗ/Iₗ): <span id="rl-calc-value">0</span> Ω</p>
+                <p id="isc-container" class="hidden">Norton Current (Iₛ𝒸, Case 2a): <span id="isc-value">0</span> A</p>
+                <p id="v2-case2b-container" class="hidden">2nd Voltage Source (V₂, Case 2b): <span id="v2-case2b-value">0</span> V</p>
+                <p id="i-case2b-container" class="hidden">Ammeter Reading (I, Case 2b): <span id="i-case2b-value">0</span> A</p>
+                <p id="rn-container" class="hidden">Norton Resistance (Rₙ = V/I, Case 2b): <span id="rn-value">0</span> Ω</p>
+                <p id="il-calc-container" class="hidden">Calculated Load Current (Iₗ, Case 3): <span id="il-calc-value">0</span> A</p>
+                <p id="verification-container" class="hidden">Verification: <span id="verification-value">Not Simulated</span></p>
+            </div>
+            <p id="switch-instruction">Select a case and set switches appropriately.</p>
+            <p><span class="watt-note">All currents in Amperes, voltages in Volts, resistances in Ohms</span></p>
+            <button class="simulate-btn" onclick="simulate()">Simulate</button>
+            <button class="add-to-table-btn" id="add-to-table-btn" onclick="debouncedAddToObservationTable()">Add to Observation Table</button>
+        </div>
+
+        <div class="observation-panel">
+            <h2>Observation Table</h2>
+            <table id="observation-table">
+                <thead>
+                    <tr>
+                        <th>Serial no. of Observation</th>
+                        <th>Load Current (Iₗ) from Case 1</th>
+                        <th>Load Voltage (Vₗ)</th>
+                        <th>Load Resistance (Rᴸ = Vₗ/Iₗ)</th>
+                        <th>Norton Current (Iₛ𝒸) from Case 2(a)</th>
+                        <th>2nd Voltage Source (V) from Case 2(b)</th>
+                        <th>Ammeter Reading (I) from Case 2(b)</th>
+                        <th>Norton Resistance Rₙ = V/I</th>
+                        <th>Load Current (Iₗ) = Iₛ𝒸*Rₙ/(Rₙ+Rᴸ)</th>
+                    </tr>
+                </thead>
+                <tbody id="observation-body">
+                    <tr><td>1</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr><td>2</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr><td>3</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr><td>4</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr><td>5</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                </tbody>
+            </table>
+            <div class="print-btn-container">
+                <button class="print-btn" onclick="printPage()">Click here to print</button>
+            </div>
+        </div>
+    </div>
+
 </head>
 <body>
-		<!-- Your code goes here-->
+    <h1>Verification of Norton's Theorem</h1>
 
-	<!-- Add JS at the bottom of HTML file --> 
-        <script src="./js/main.js"></script>
+    <div class="main-container">
+        <div class="procedure-panel">
+            <h2>Simplified Procedure (Step-by-Step)</h2>
+            <p><strong>✅ Before You Start:</strong></p>
+            <p>Make sure JavaScript is enabled in your browser.</p>
+            <p>Set all resistors (R₁, R₂, R₃, and Rᴸ) close to their maximum values.</p>
+            <p>You can choose any values for the voltages V₁ and V₂.</p>
+            <h2>🔬 Select the Part of the Experiment You Want to Do:</h2>
+            <p><strong>🟦 Case 1 – Find the Load Current (𝐼ₗ):</strong></p>
+            <p>Set switch S₁ = Power and S₂ = Load.</p>
+            <p>Click Simulate.</p>
+            <p>The load current (𝐼ₗ) will be displayed.</p>
+            <p><strong>🟦 Case 2 – Norton’s Theorem Steps:</strong></p>
+            <p>a) <strong>Find Norton Short Circuit Current (𝐼ₛ𝒸):</strong></p>
+            <p>Set S₁ = Power, S₂ = Short.</p>
+            <p>Click Simulate.</p>
+            <p>Note the value of 𝐼ₛ𝒸.</p>
+            <p>b) <strong>Find Norton Resistance (𝑅ₙ):</strong></p>
+            <p>Set S₁ = Short, S₂ = Power.</p>
+            <p>Click Simulate.</p>
+            <p>Note the value of 𝑅ₙ.</p>
+            <p><strong>🟦 Case 3 – Use Norton Values to Calculate Load Current:</strong></p>
+            <p>Go to Case 3 tab.</p>
+            <p>You’ll see the load current (𝐼ₗ) calculated using:</p>
+            <p>𝐼ₗ = 𝐼ₛ𝒸 ⋅ (Rᴸ / (Rₙ + Rᴸ))</p>
+            <p>Compare this with the load current from Case 1.</p>
+            <p><strong>📝 Notes:</strong></p>
+            <p>MC = Moving Coil meter.</p>
+            <p>DPDT = Double Pole Double Throw (type of switch).</p>
+            <p>All resistances are in ohms (Ω).</p>
+        </div>
+
+        <div class="circuit-container">
+            <div class="calculation-panel-left">
+                <h2>Inputs & Switches</h2>
+                <div class="input-field">
+                    <label>V1:</label>
+                    <input type="number" id="v1-input" value="220" min="0" step="1" oninput="updateCircuitLabels()">V
+                </div>
+                <div class="input-field">
+                    <label>V2:</label>
+                    <input type="number" id="v2-input" value="110" min="0" step="1" oninput="updateCircuitLabels()">V
+                </div>
+                <div class="input-field">
+                    <label>R1:</label>
+                    <input type="number" id="r1-input" value="100" min="1" step="1" oninput="updateCircuitLabels()">Ω
+                </div>
+                <div class="input-field">
+                    <label>R2:</label>
+                    <input type="number" id="r2-input" value="150" min="1" step="1" oninput="updateCircuitLabels()">Ω
+                </div>
+                <div class="input-field">
+                    <label>R3:</label>
+                    <input type="number" id="r3-input" value="200" min="1" step="1" oninput="updateCircuitLabels()">Ω
+                </div>
+                <div class="input-field">
+                    <label>Rᴸ:</label>
+                    <input type="number" id="rl-input" value="250" min="1" step="1" oninput="updateCircuitLabels()">Ω
+                </div>
+                <div class="switch">
+                    <label>S1:</label>
+                    <select id="s1">
+                        <option value="power">Power</option>
+                        <option value="short">Short</option>
+                        <option value="dpdt">DPDT</option>
+                    </select>
+                </div>
+                <div class="switch">
+                    <label>S2:</label>
+                    <select id="s2">
+                        <option value="load">Load</option>
+                        <option value="short">Short</option>
+                        <option value="power">Power</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="circuit-panel">
+                <h2>Circuit Diagram</h2>
+                <img id="circuit-image" src="Norton-1.png" alt="Norton-1">
+                <svg id="circuit-overlay" class="circuit-overlay">
+                    <text id="v1-label" x="17" y="297">V1: 220 V</text>
+                    <text id="v2-label" x="400" y="305">V2: 110 V</text>
+                    <text id="r1-label" x="190" y="220">R1: 100 Ω</text>
+                    <text id="r2-label" x="230" y="290">R2: 150 Ω</text>
+                    <text id="r3-label" x="320" y="220">R3: 200 Ω</text>
+                    <text id="rl-label" x="500" y="310">Rᴸ: 250 Ω</text>
+                </svg>
+                <button class="save-diagram-btn" onclick="saveCircuitDiagram()">Save Diagram</button>
+            </div>
+
+            <div class="calculation-panel-right">
+                <h2>Meters</h2>
+                <div class="meter">
+                    <div id="meter-a1-label">Meter A1: Iₗ</div>
+                    <svg class="meter-svg" viewBox="0 0 180 120">
+                        <circle cx="90" cy="90" r="80" fill="#f0f0f0" stroke="#333" stroke-width="3"/>
+                        <path d="M 10 90 A 80 80 0 0 1 170 90" fill="none" stroke="url(#meterGradientA)" stroke-width="15"/>
+                        <defs>
+                            <linearGradient id="meterGradientA" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#ff9999"/>
+                                <stop offset="50%" stop-color="#ff4d4d"/>
+                                <stop offset="100%" stop-color="#ff9999"/>
+                            </linearGradient>
+                        </defs>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(-90 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(-45 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(0 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(45 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(90 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="60" class="meter-tick-minor" transform="rotate(-67.5 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="60" class="meter-tick-minor" transform="rotate(-22.5 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="60" class="meter-tick-minor" transform="rotate(22.5 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="60" class="meter-tick-minor" transform="rotate(67.5 90 90)"/>
+                        <text x="90" y="45" class="meter-label" transform="rotate(-90 90 90)">-5 A</text>
+                        <text x="90" y="45" class="meter-label" transform="rotate(-45 90 90)">-2.5 A</text>
+                        <text x="90" y="45" class="meter-label" transform="rotate(0 90 90)">0 A</text>
+                        <text x="90" y="45" class="meter-label" transform="rotate(45 90 90)">2.5 A</text>
+                        <text x="90" y="45" class="meter-label" transform="rotate(90 90 90)">5 A</text>
+                        <line x1="90" y1="90" x2="90" y2="30" stroke="#333" stroke-width="3" opacity="0.3" transform-origin="90 90" id="a1-needle-shadow"/>
+                        <line x1="90" y1="90" x2="90" y2="30" stroke="url(#needleGradientA)" stroke-width="2" transform-origin="90 90" id="a1-needle" filter="url(#needleGlow)"/>
+                        <defs>
+                            <linearGradient id="needleGradientA" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#ff4d4d"/>
+                                <stop offset="100%" stop-color="#cc0000"/>
+                            </linearGradient>
+                            <filter id="needleGlow" x="-50%" y="-50%" width="200%" height="200%">
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+                                <feMerge>
+                                    <feMergeNode in="blur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <circle cx="90" cy="90" r="78" fill="url(#glassGradient)" opacity="0.3"/>
+                        <defs>
+                            <radialGradient id="glassGradient">
+                                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+                                <stop offset="100%" stop-color="#aaaaaa" stop-opacity="0.2"/>
+                            </radialGradient>
+                        </defs>
+                        <rect x="70" y="100" width="40" height="15" fill="#333" rx="3"/>
+                        <text x="90" y="110" class="meter-text">A1</text>
+                    </svg>
+                </div>
+                <div class="meter">
+                    <div id="meter-mc-label">Meter MC: Voltage</div>
+                    <svg class="meter-svg" viewBox="0 0 180 120">
+                        <circle cx="90" cy="90" r="80" fill="#f0f0f0" stroke="#333" stroke-width="3"/>
+                        <path d="M 50 90 A 40 40 0 0 1 130 90" fill="none" stroke="url(#meterGradientV)" stroke-width="15"/>
+                        <defs>
+                            <linearGradient id="meterGradientV" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#99b3ff"/>
+                                <stop offset="50%" stop-color="#4d79ff"/>
+                                <stop offset="100%" stop-color="#99b3ff"/>
+                            </linearGradient>
+                        </defs>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(-90 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(-45 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="50" class="meter-tick" transform="rotate(0 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="60" class="meter-tick-minor" transform="rotate(-67.5 90 90)"/>
+                        <line x1="90" y1="90" x2="90" y2="60" class="meter-tick-minor" transform="rotate(-22.5 90 90)"/>
+                        <text x="90" y="45" class="meter-label" transform="rotate(-90 90 90)">0 V</text>
+                        <text x="90" y="45" class="meter-label" transform="rotate(-45 90 90)">150 V</text>
+                        <text x="90" y="45" class="meter-label" transform="rotate(0 90 90)">300 V</text>
+                        <line x1="90" y1="90" x2="90" y2="30" stroke="#333" stroke-width="3" opacity="0.3" transform-origin="90 90" id="mc-needle-shadow"/>
+                        <line x1="90" y1="90" x2="90" y2="30" stroke="url(#needleGradientV)" stroke-width="2" transform-origin="90 90" id="mc-needle" filter="url(#needleGlow)"/>
+                        <defs>
+                            <linearGradient id="needleGradientV" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#4d79ff"/>
+                                <stop offset="100%" stop-color="#0033cc"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="90" cy="90" r="78" fill="url(#glassGradient)" opacity="0.3"/>
+                        <rect x="70" y="100" width="40" height="15" fill="#333" rx="3"/>
+                        <text x="90" y="110" class="meter-text">MC</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="calculation-panel">
+            <h2>Experiment Selection</h2>
+            <div class="tabs">
+                <div class="tab active" onclick="selectTab('case1')">Case 1</div>
+                <div class="tab" onclick="selectTab('case2a')">Case 2a</div>
+                <div class="tab" onclick="selectTab('case2b')">Case 2b</div>
+                <div class="tab" onclick="selectTab('case3')">Case 3</div>
+            </div>
+        </div>
+
+        <div class="results-panel" id="results">
+            <h2 id="results-title">Results</h2>
+            <p id="results-equation">Select a case and click Simulate to view results.</p>
+            <div class="power-values">
+                <p id="il-container" class="hidden">Load Current (Iₗ, Case 1): <span id="il-value">0</span> A</p>
+                <p id="vl-container" class="hidden">Load Voltage (Vₗ, Case 1): <span id="vl-value">0</span> V</p>
+                <p id="rl-calc-container">Load Resistance (Rᴸ = Vₗ/Iₗ): <span id="rl-calc-value">0</span> Ω</p>
+                <p id="isc-container" class="hidden">Norton Current (Iₛ𝒸, Case 2a): <span id="isc-value">0</span> A</p>
+                <p id="v2-case2b-container" class="hidden">2nd Voltage Source (V₂, Case 2b): <span id="v2-case2b-value">0</span> V</p>
+                <p id="i-case2b-container" class="hidden">Ammeter Reading (I, Case 2b): <span id="i-case2b-value">0</span> A</p>
+                <p id="rn-container" class="hidden">Norton Resistance (Rₙ = V/I, Case 2b): <span id="rn-value">0</span> Ω</p>
+                <p id="il-calc-container" class="hidden">Calculated Load Current (Iₗ, Case 3): <span id="il-calc-value">0</span> A</p>
+                <p id="verification-container" class="hidden">Verification: <span id="verification-value">Not Simulated</span></p>
+            </div>
+            <p id="switch-instruction">Select a case and set switches appropriately.</p>
+            <p><span class="watt-note">All currents in Amperes, voltages in Volts, resistances in Ohms</span></p>
+            <button class="simulate-btn" onclick="simulate()">Simulate</button>
+            <button class="add-to-table-btn" id="add-to-table-btn" onclick="debouncedAddToObservationTable()">Add to Observation Table</button>
+        </div>
+
+        <div class="observation-panel">
+            <h2>Observation Table</h2>
+            <table id="observation-table">
+                <thead>
+                    <tr>
+                        <th>Serial no. of Observation</th>
+                        <th>Load Current (Iₗ) from Case 1</th>
+                        <th>Load Voltage (Vₗ)</th>
+                        <th>Load Resistance (Rᴸ = Vₗ/Iₗ)</th>
+                        <th>Norton Current (Iₛ𝒸) from Case 2(a)</th>
+                        <th>2nd Voltage Source (V) from Case 2(b)</th>
+                        <th>Ammeter Reading (I) from Case 2(b)</th>
+                        <th>Norton Resistance Rₙ = V/I</th>
+                        <th>Load Current (Iₗ) = Iₛ𝒸*Rₙ/(Rₙ+Rᴸ)</th>
+                    </tr>
+                </thead>
+                <tbody id="observation-body">
+                    <tr><td>1</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr><td>2</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr><td>3</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr><td>4</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr><td>5</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                </tbody>
+            </table>
+            <div class="print-btn-container">
+                <button class="print-btn" onclick="printPage()">Click here to print</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+            return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+                try {
+                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                    var firstSheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[firstSheetName];
+                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                    var filteredData = jsonData.filter(row => row.some(filledCell));
+                    var headerRowIndex = filteredData.findIndex((row, index) =>
+                        row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                    );
+                    if (headerRowIndex === -1 || headerRowIndex > 25) {
+                        headerRowIndex = 0;
+                    }
+                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                    return csv;
+                } catch (e) {
+                    console.error(e);
+                    return "";
+                }
+            }
+            return gk_fileData[filename] || "";
+        }
+
+        let results = {
+            case1: null,
+            case2a: null,
+            case2b: null,
+            case3: null
+        };
+        let currentCase = 'case1';
+        let observationCount = 0;
+        const maxObservations = 5;
+        let isAddingToTable = false;
+
+        function updateCircuitLabels() {
+            const v1 = parseFloat(document.getElementById('v1-input').value) || 0;
+            const v2 = parseFloat(document.getElementById('v2-input').value) || 0;
+            const r1 = parseFloat(document.getElementById('r1-input').value) || 100;
+            const r2 = parseFloat(document.getElementById('r2-input').value) || 150;
+            const r3 = parseFloat(document.getElementById('r3-input').value) || 200;
+            const rl = parseFloat(document.getElementById('rl-input').value) || 250;
+
+            document.getElementById('v1-label').textContent = `V1: ${v1} V`;
+            document.getElementById('v2-label').textContent = `V2: ${v2} V`;
+            document.getElementById('r1-label').textContent = `R1: ${r1} Ω`;
+            document.getElementById('r2-label').textContent = `R2: ${r2} Ω`;
+            document.getElementById('r3-label').textContent = `R3: ${r3} Ω`;
+            document.getElementById('rl-label').textContent = `Rᴸ: ${rl} Ω`;
+        }
+
+        function saveCircuitDiagram() {
+            const imgElement = document.getElementById('circuit-image');
+            const svgElement = document.getElementById('circuit-overlay');
+
+            // Create a canvas with the same dimensions as the circuit diagram
+            const canvas = document.createElement('canvas');
+            canvas.width = 600; // Match the width of the circuit diagram
+            canvas.height = 400; // Match the height of the circuit diagram
+            const ctx = canvas.getContext('2d');
+
+            // Draw the image onto the canvas
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; // In case the image is hosted on a different domain
+            img.src = imgElement.src;
+
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, 600, 400);
+
+                // Convert SVG to an image and draw it onto the canvas
+                const svgData = new XMLSerializer().serializeToString(svgElement);
+                const svgImg = new Image();
+                svgImg.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+
+                svgImg.onload = function() {
+                    ctx.drawImage(svgImg, 0, 0, 600, 400);
+
+                    // Create a downloadable link for the canvas content
+                    const dataURL = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = 'nortons-theorem.png';
+                    link.href = dataURL;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                };
+
+                svgImg.onerror = function() {
+                    alert('Error rendering SVG overlay. The diagram image will be saved without labels.');
+                    // Fallback: Save the image without the SVG overlay
+                    const dataURL = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = 'nortons-theorem.png';
+                    link.href = dataURL;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                };
+            };
+
+            img.onerror = function() {
+                alert('Error loading the circuit diagram image. Please ensure the image is accessible.');
+            };
+        }
+
+        function animateMeter(needleId, shadowId, value, maxValue, isVoltmeter = false) {
+            const angle = isVoltmeter ? -90 + (value / maxValue) * 90 : -90 + (value / maxValue) * 180;
+            anime({
+                targets: [`#${needleId}`, `#${shadowId}`],
+                rotate: [
+                    { value: angle * 0.9, duration: 800, easing: 'easeOutQuad' },
+                    { value: angle * 1.05, duration: 300, easing: 'easeInOutQuad' },
+                    { value: angle, duration: 200, easing: 'easeInOutQuad' }
+                ],
+                duration: 1300,
+                easing: 'easeInOutQuad'
+            });
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        const debouncedAddToObservationTable = debounce(() => {
+            if (isAddingToTable) return;
+            isAddingToTable = true;
+            const addBtn = document.getElementById('add-to-table-btn');
+            addBtn.disabled = true;
+            try {
+                addToObservationTable();
+            } finally {
+                isAddingToTable = false;
+                addBtn.disabled = false;
+            }
+        }, 300);
+
+        function selectTab(caseId) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`.tab[onclick="selectTab('${caseId}')"]`).classList.add('active');
+
+            const s1 = document.getElementById('s1');
+            const s2 = document.getElementById('s2');
+            const v1Input = document.getElementById('v1-input');
+            const v2Input = document.getElementById('v2-input');
+            const resultsTitle = document.getElementById('results-title');
+            const resultsEquation = document.getElementById('results-equation');
+            const switchInstruction = document.getElementById('switch-instruction');
+            const addToTableBtn = document.getElementById('add-to-table-btn');
+            const meterA1Label = document.getElementById('meter-a1-label');
+            const meterMCLabel = document.getElementById('meter-mc-label');
+
+            // Hide all result containers
+            document.getElementById('il-container').classList.add('hidden');
+            document.getElementById('vl-container').classList.add('hidden');
+            document.getElementById('rl-calc-container').classList.add('hidden');
+            document.getElementById('isc-container').classList.add('hidden');
+            document.getElementById('v2-case2b-container').classList.add('hidden');
+            document.getElementById('i-case2b-container').classList.add('hidden');
+            document.getElementById('rn-container').classList.add('hidden');
+            document.getElementById('il-calc-container').classList.add('hidden');
+            document.getElementById('verification-container').classList.add('hidden');
+
+            currentCase = caseId;
+
+            if (caseId === 'case1') {
+                s1.value = 'power';
+                s2.value = 'load';
+                v1Input.value = 220;
+                v2Input.value = 110;
+                resultsTitle.textContent = 'Load Current (Iₗ)';
+                resultsEquation.textContent = 'Circuit analysis to determine Load Current (Iₗ). To get the load current select switches S₁ to Power and S₂ to Load. And then click on Simulate.';
+                switchInstruction.textContent = 'Set switch S₁ to Power and S₂ to Load.';
+                addToTableBtn.style.display = 'none';
+                meterA1Label.textContent = 'Meter A1: Iₗ';
+                meterMCLabel.textContent = 'Meter MC: Vₗ';
+                document.getElementById('il-container').classList.remove('hidden');
+                document.getElementById('vl-container').classList.remove('hidden');
+                document.getElementById('rl-calc-container').classList.remove('hidden');
+            } else if (caseId === 'case2a') {
+                s1.value = 'power';
+                s2.value = 'short';
+                v1Input.value = 220;
+                v2Input.value = 110;
+                resultsTitle.textContent = 'Norton Short Circuit Current (Iₛ𝒸)';
+                resultsEquation.textContent = 'Simulate to find Norton Short Circuit Current (Iₛ𝒸).';
+                switchInstruction.textContent = 'Set switch S₁ to Power and S₂ to Short.';
+                addToTableBtn.style.display = 'none';
+                meterA1Label.textContent = 'Meter A1: Iₛ𝒸';
+                meterMCLabel.textContent = 'Meter MC: Voltage';
+                document.getElementById('isc-container').classList.remove('hidden');
+            } else if (caseId === 'case2b') {
+                s1.value = 'short';
+                s2.value = 'power';
+                v1Input.value = 0;
+                v2Input.value = 110;
+                resultsTitle.textContent = 'Norton Resistance (Rₙ)';
+                resultsEquation.textContent = 'Simulate to find Norton Resistance (Rₙ = V/I).';
+                switchInstruction.textContent = 'Set switch S₁ to Short and S₂ to Power.';
+                addToTableBtn.style.display = 'none';
+                meterA1Label.textContent = 'Meter A1: I';
+                meterMCLabel.textContent = 'Meter MC: V₂';
+                document.getElementById('v2-case2b-container').classList.remove('hidden');
+                document.getElementById('i-case2b-container').classList.remove('hidden');
+                document.getElementById('rn-container').classList.remove('hidden');
+            } else if (caseId === 'case3') {
+                s1.value = 'power';
+                s2.value = 'load';
+                v1Input.value = 220;
+                v2Input.value = 110;
+                resultsTitle.textContent = 'Calculated Load Current';
+                resultsEquation.textContent = 'Iₗ = Iₛ𝒸 ⋅ (Rᴸ / (Rₙ + Rᴸ))';
+                switchInstruction.textContent = 'Simulate to compare calculated Iₗ with Case 1.';
+                addToTableBtn.style.display = 'inline-block';
+                meterA1Label.textContent = 'Meter A1: Iₗ';
+                meterMCLabel.textContent = 'Meter MC: Vₗ';
+                document.getElementById('il-calc-container').classList.remove('hidden');
+                document.getElementById('verification-container').classList.remove('hidden');
+            }
+            updateCircuitLabels();
+        }
+
+        function simulate() {
+            const R1 = parseFloat(document.getElementById('r1-input').value) || 100;
+            const R2 = parseFloat(document.getElementById('r2-input').value) || 150;
+            const R3 = parseFloat(document.getElementById('r3-input').value) || 200;
+            const RL = parseFloat(document.getElementById('rl-input').value) || 250;
+            const V1 = parseFloat(document.getElementById('v1-input').value) || 0;
+            const V2 = parseFloat(document.getElementById('v2-input').value) || 0;
+            const S1 = document.getElementById('s1').value;
+            const S2 = document.getElementById('s2').value;
+
+            if (R1 <= 0 || R2 <= 0 || R3 <= 0 || RL <= 0) {
+                alert('Resistor values must be greater than 0 to avoid division by zero.');
+                return;
+            }
+
+            let IL = 0, VL = 0, ISC = 0, I_case2b = 0, V_case2b = 0, RN = 0;
+
+            if (currentCase === 'case1' && S1 === 'power' && S2 === 'load') {
+                const R_3L = R3 + RL;
+                const R_23L = (R2 * R_3L) / (R2 + R_3L);
+                const R_eq = R1 + R_23L;
+                const I_total = (V1 + V2) / R_eq;
+                const V_23L = I_total * R_23L;
+                IL = V_23L / R_3L;
+                VL = IL * RL;
+                results.case1 = { IL, VL, RL_calc: VL / IL };
+                document.getElementById('il-value').textContent = IL.toFixed(4);
+                document.getElementById('vl-value').textContent = VL.toFixed(4);
+                document.getElementById('rl-calc-value').textContent = (VL / IL).toFixed(4);
+                animateMeter('a1-needle', 'a1-needle-shadow', Math.abs(IL), 5);
+                animateMeter('mc-needle', 'mc-needle-shadow', VL, 300, true);
+            } else if (currentCase === 'case2a' && S1 === 'power' && S2 === 'short') {
+                const R_23 = (R2 * R3) / (R2 + R3);
+                const R_eq = R1 + R_23;
+                ISC = (V1 + V2) / R_eq;
+                VL = 0;
+                results.case2a = { ISC, VL };
+                document.getElementById('isc-value').textContent = ISC.toFixed(4);
+                animateMeter('a1-needle', 'a1-needle-shadow', Math.abs(ISC), 5);
+                animateMeter('mc-needle', 'mc-needle-shadow', VL, 300, true);
+            } else if (currentCase === 'case2b' && S1 === 'short' && S2 === 'power') {
+                const R_12 = (R1 * R2) / (R1 + R2);
+                RN = R_12 + R3;
+                I_case2b = V2 / (R_12 + R3);
+                V_case2b = I_case2b * R_12;
+                results.case2b = { RN, I_case2b, V_case2b };
+                document.getElementById('v2-case2b-value').textContent = V_case2b.toFixed(4);
+                document.getElementById('i-case2b-value').textContent = I_case2b.toFixed(4);
+                document.getElementById('rn-value').textContent = RN.toFixed(4);
+                animateMeter('a1-needle', 'a1-needle-shadow', Math.abs(I_case2b), 5);
+                animateMeter('mc-needle', 'mc-needle-shadow', V_case2b, 300, true);
+            } else if (currentCase === 'case3' && S1 === 'power' && S2 === 'load') {
+                if (!results.case2a || !results.case2b) {
+                    alert('Please simulate Case 2a and Case 2b to obtain Iₛ𝒸 and Rₙ before running Case 3.');
+                    return;
+                }
+                const R_3L = R3 + RL;
+                const R_23L = (R2 * R_3L) / (R2 + R_3L);
+                const R_eq = R1 + R_23L;
+                const I_total = (V1 + V2) / R_eq;
+                const V_23L = I_total * R_23L;
+                IL = V_23L / R_3L;
+                VL = IL * RL;
+                results.case3 = { IL_calc: IL, VL };
+                document.getElementById('il-calc-value').textContent = IL.toFixed(4);
+                document.getElementById('verification-value').textContent = results.case1
+                    ? (Math.abs(results.case1.IL - IL) < 0.0001 ? 'Verified' : 'Not Verified')
+                    : 'Run Case 1 First';
+                animateMeter('a1-needle', 'a1-needle-shadow', Math.abs(IL), 5);
+                animateMeter('mc-needle', 'mc-needle-shadow', VL, 300, true);
+            } else {
+                alert('Invalid switch settings or case selection.');
+                return;
+            }
+            updateCircuitLabels();
+        }
+
+        function addToObservationTable() {
+            if (!results.case1 || !results.case2a || !results.case2b || !results.case3) {
+                alert('Please simulate all cases (Case 1, Case 2a, Case 2b, and Case 3) before adding to the observation table.');
+                return;
+            }
+
+            if (observationCount >= maxObservations) {
+                alert('Maximum number of observations (5) reached. Please print the table to start over.');
+                return;
+            }
+
+            const tableBody = document.getElementById('observation-body');
+            const row = tableBody.rows[observationCount];
+            row.cells[1].textContent = results.case1.IL.toFixed(4);
+            row.cells[2].textContent = results.case1.VL.toFixed(4);
+            row.cells[3].textContent = results.case1.RL_calc.toFixed(4);
+            row.cells[4].textContent = results.case2a.ISC.toFixed(4);
+            row.cells[5].textContent = results.case2b.V_case2b.toFixed(4);
+            row.cells[6].textContent = results.case2b.I_case2b.toFixed(4);
+            row.cells[7].textContent = results.case2b.RN.toFixed(4);
+            row.cells[8].textContent = results.case3.IL_calc.toFixed(4);
+
+            observationCount++;
+        }
+
+        function printPage() {
+            window.print();
+            const tableBody = document.getElementById('observation-body');
+            for (let i = 0; i < tableBody.rows.length; i++) {
+                const row = tableBody.rows[i];
+                for (let j = 1; j < row.cells.length; j++) {
+                    row.cells[j].textContent = '';
+                }
+            }
+            observationCount = 0;
+            results = {
+                case1: null,
+                case2a: null,
+                case2b: null,
+                case3: null
+            };
+            selectTab('case1');
+        }
+
+        updateCircuitLabels();
+        animateMeter('a1-needle', 'a1-needle-shadow', 0, 5);
+        animateMeter('mc-needle', 'mc-needle-shadow', 0, 300, true);
+        selectTab('case1');
+    </script>
 </body>
 </html>
