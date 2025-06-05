@@ -1,1 +1,1 @@
-## Experiment name
+ Verification of Norton’s Theorem in a Linear Electrical Circuit

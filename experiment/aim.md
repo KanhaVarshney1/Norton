@@ -1,1 +1,2 @@
-### Aim of the experiment
+Norton’s Theorem :-
+To study and apply Norton’s Theorem to simplify a complex linear electrical circuit by determining its Norton equivalent circuit, consisting of a Norton current source (I_N) in parallel with a Norton equivalent resistance (R_N), and to verify the theorem by analyzing the circuit’s behavior across a load.
